@@ -1,0 +1,192 @@
+export const registerResponse = {
+  user: {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    email: 'test@example.com',
+    email_verified: false,
+    plan: 'free' as const,
+    credit_balance: 100,
+    created_at: '2026-01-01T00:00:00.000Z',
+  },
+  api_key: 'bv_live_abc123def456',
+};
+
+export const loginResponse = {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test',
+  user: {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    email: 'test@example.com',
+    email_verified: true,
+    plan: 'free' as const,
+    credit_balance: 100,
+    created_at: '2026-01-01T00:00:00.000Z',
+  },
+};
+
+export const messageResponse = {
+  message: 'Success',
+};
+
+export const verifyResponseSync = {
+  status: 'completed',
+  data: { exists: true, status: 'active', good_standing: true, entity_name: 'Acme Inc', jurisdiction: 'us-fl' },
+  entity_id: 'ent_123',
+  cached: true,
+  credits_charged: 1,
+};
+
+export const verifyResponseAsync = {
+  status: 'pending',
+  job_id: 'job_456',
+  cached: false,
+  credits_charged: 15,
+};
+
+export const jobStatusPending = {
+  id: 'job_456',
+  status: 'pending' as const,
+  jurisdiction: 'us-fl',
+  query: 'Acme Inc',
+  verification_level: 'full',
+  credits_charged: 15,
+  created_at: '2026-01-01T00:00:00.000Z',
+  completed_at: null,
+};
+
+export const jobStatusCompleted = {
+  id: 'job_456',
+  status: 'completed' as const,
+  jurisdiction: 'us-fl',
+  query: 'Acme Inc',
+  verification_level: 'full',
+  credits_charged: 15,
+  result: { exists: true },
+  created_at: '2026-01-01T00:00:00.000Z',
+  completed_at: '2026-01-01T00:01:00.000Z',
+};
+
+export const jobStatusFailed = {
+  id: 'job_456',
+  status: 'failed' as const,
+  jurisdiction: 'us-fl',
+  query: 'Acme Inc',
+  verification_level: 'full',
+  credits_charged: 15,
+  error: 'Data source timeout',
+  created_at: '2026-01-01T00:00:00.000Z',
+  completed_at: '2026-01-01T00:01:00.000Z',
+};
+
+export const entityResponse = {
+  id: 'ent_123',
+  entity_name: 'Acme Inc',
+  jurisdiction: 'us-fl',
+  entity_type: 'corporation' as const,
+  status: 'active' as const,
+  jurisdiction_id: 'FL12345',
+  good_standing: true,
+  formation_date: '2020-01-15',
+  registered_agent: { name: 'Agent Corp', address: null },
+  officers: [],
+  principal_address: null,
+  filing_history_summary: [],
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+};
+
+export const historyResponse = {
+  snapshots: [{ id: 'snap_1', data: {} }],
+  total: 1,
+  limit: 50,
+  offset: 0,
+};
+
+export const searchResponse = {
+  results: [
+    {
+      entity_name: 'Acme Inc',
+      jurisdiction: 'us-fl',
+      entity_type: 'corporation' as const,
+      status: 'active' as const,
+      jurisdiction_id: 'FL12345',
+      confidence: 0.95,
+    },
+  ],
+  total: 1,
+  limit: 50,
+  offset: 0,
+  jurisdictions_searched: ['us-fl'],
+  jurisdictions_failed: [],
+  credits_charged: 2,
+};
+
+export const accountResponse = {
+  id: '550e8400-e29b-41d4-a716-446655440000',
+  email: 'test@example.com',
+  email_verified: true,
+  plan: 'free' as const,
+  credit_balance: 100,
+  api_keys: [],
+  created_at: '2026-01-01T00:00:00.000Z',
+};
+
+export const usageResponse = {
+  period_days: 30,
+  daily: [],
+  by_endpoint: [],
+  by_jurisdiction: [],
+};
+
+export const dataExportResponse = {
+  profile: {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    email: 'test@example.com',
+    email_verified: true,
+    plan: 'free',
+    credit_balance: 100,
+    terms_accepted_at: null,
+    terms_version: null,
+    created_at: '2026-01-01T00:00:00.000Z',
+  },
+  api_keys: [],
+  credit_transactions: [],
+  verification_jobs: [],
+  usage_stats: [],
+};
+
+export const createKeyResponse = {
+  id: 'key_123',
+  key: 'bv_live_newkey',
+  prefix: 'bv_live_new',
+  label: 'My Key',
+  message: 'Store this API key securely. It will not be shown again.',
+};
+
+export const billingResponse = {
+  balance: 100,
+  packages: [],
+  transactions: [],
+};
+
+export const purchaseResponse = {
+  session_id: 'cs_test_123',
+  url: 'https://checkout.stripe.com/session/cs_test_123',
+};
+
+export const checkerResponse = {
+  results: [
+    {
+      entity_name: 'Acme Inc',
+      entity_type: 'corporation',
+      status: 'active',
+      jurisdiction: 'us-fl',
+      confidence: 0.9,
+    },
+  ],
+  query: 'Acme',
+  jurisdiction: 'us-fl',
+  total: 1,
+};
+
+export const errorResponse = (code: string, message: string) => ({
+  error: { code, message },
+});
