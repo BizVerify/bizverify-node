@@ -1,25 +1,11 @@
-export const registerResponse = {
-  user: {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    email: 'test@example.com',
-    email_verified: false,
-    plan: 'free' as const,
-    credit_balance: 100,
-    created_at: '2026-01-01T00:00:00.000Z',
-  },
-  api_key: 'bv_live_abc123def456',
+export const requestAccessResponse = {
+  message: 'Verification code sent to test@example.com',
 };
 
-export const loginResponse = {
-  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test',
-  user: {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    email: 'test@example.com',
-    email_verified: true,
-    plan: 'free' as const,
-    credit_balance: 100,
-    created_at: '2026-01-01T00:00:00.000Z',
-  },
+export const verifyAccessResponse = {
+  api_key: 'bv_live_abc123def456',
+  key_id: 'key_001',
+  label: 'key-1710000000',
 };
 
 export const messageResponse = {
@@ -185,6 +171,31 @@ export const checkerResponse = {
   query: 'Acme',
   jurisdiction: 'us-fl',
   total: 1,
+};
+
+export const configResponse = {
+  jurisdictions: {
+    stats: { totalJurisdictions: 61, usStates: 50, countries: 11 },
+    supported: { us: ['us-fl', 'us-de'], international: ['ee', 'gb'], comingSoon: [] },
+  },
+  checker: { jurisdictions: [{ label: 'Florida', code: 'us-fl' }] },
+  pricing: {
+    creditCosts: { verify: 15, search: 2 },
+    freeTier: { credits: 50, replenish: 'never', rateLimit: '10/min' },
+    packages: [],
+  },
+  features: { verification: true, search: true },
+  rateLimits: { default: 60 },
+  status: { api: 'operational', lastUpdated: '2026-03-20T00:00:00Z' },
+  legal: { terms_url: 'https://bizverify.co/terms', privacy_url: 'https://bizverify.co/privacy', version: '1.0' },
+  docs: { openapi: '/v1/openapi.json', interactive: '/docs' },
+};
+
+export const jurisdictionsResponse = {
+  jurisdictions: [
+    { code: 'us-fl', name: 'Florida', features: { search: true, verify: true } },
+    { code: 'us-de', name: 'Delaware', features: { search: true, verify: true } },
+  ],
 };
 
 export const errorResponse = (code: string, message: string) => ({

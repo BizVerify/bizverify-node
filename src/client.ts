@@ -1,4 +1,4 @@
-import type { BizVerifyOptions } from './types.js';
+import type { BizVerifyOptions, ResponseMeta } from './types.js';
 import { BizVerifyError, parseErrorResponse } from './errors.js';
 
 const DEFAULT_BASE_URL = 'https://api.bizverify.co';
@@ -10,7 +10,7 @@ interface RequestOptions {
   path: string;
   body?: unknown;
   query?: Record<string, string | number | undefined>;
-  auth?: 'apiKey' | 'jwt' | 'none';
+  auth?: 'apiKey' | 'none';
 }
 
 export class HttpClient {
@@ -19,7 +19,7 @@ export class HttpClient {
   private readonly timeout: number;
   private readonly fetchFn: typeof globalThis.fetch;
   private apiKey?: string;
-  private token?: string;
+  private _lastResponseMeta: ResponseMeta | null = null;
 
   constructor(options: BizVerifyOptions = {}) {
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
@@ -27,15 +27,14 @@ export class HttpClient {
     this.timeout = options.timeout ?? DEFAULT_TIMEOUT;
     this.fetchFn = options.fetch ?? globalThis.fetch;
     this.apiKey = options.apiKey;
-    this.token = options.token;
-  }
-
-  setToken(token: string): void {
-    this.token = token;
   }
 
   setApiKey(apiKey: string): void {
     this.apiKey = apiKey;
+  }
+
+  get lastResponseMeta(): ResponseMeta | null {
+    return this._lastResponseMeta;
   }
 
   async request<T>(options: RequestOptions): Promise<T> {
@@ -64,6 +63,14 @@ export class HttpClient {
       try {
         const response = await this.fetchFn(url, requestInit);
         clearTimeout(timeoutId);
+
+        this._lastResponseMeta = {
+          creditsRemaining: parseIntHeader(response.headers, 'x-credits-remaining'),
+          creditsCharged: parseIntHeader(response.headers, 'x-credits-charged'),
+          rateLimitLimit: parseIntHeader(response.headers, 'x-ratelimit-limit'),
+          rateLimitRemaining: parseIntHeader(response.headers, 'x-ratelimit-remaining'),
+          rateLimitReset: parseIntHeader(response.headers, 'x-ratelimit-reset'),
+        };
 
         if (response.status === 204) {
           return undefined as T;
@@ -128,7 +135,7 @@ export class HttpClient {
     return url.toString();
   }
 
-  private buildHeaders(auth: 'apiKey' | 'jwt' | 'none', hasBody: boolean): Record<string, string> {
+  private buildHeaders(auth: 'apiKey' | 'none', hasBody: boolean): Record<string, string> {
     const headers: Record<string, string> = {
       'Accept': 'application/json',
     };
@@ -139,12 +146,17 @@ export class HttpClient {
 
     if (auth === 'apiKey' && this.apiKey) {
       headers['X-API-Key'] = this.apiKey;
-    } else if (auth === 'jwt' && this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
     }
 
     return headers;
   }
+}
+
+function parseIntHeader(headers: Headers, name: string): number | null {
+  const value = headers.get(name);
+  if (value === null) return null;
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? null : parsed;
 }
 
 function sleep(ms: number): Promise<void> {

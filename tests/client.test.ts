@@ -39,10 +39,10 @@ describe('HttpClient', () => {
     expect(headers['X-API-Key']).toBe('bv_test_key');
   });
 
-  it('sends POST with JWT auth and body', async () => {
+  it('sends POST with body and content-type', async () => {
     let capturedInit: RequestInit | undefined;
     const client = new HttpClient({
-      token: 'jwt_token',
+      apiKey: 'bv_test_key',
       baseUrl: 'https://api.test.com',
       fetch: async (_url, init) => {
         capturedInit = init;
@@ -55,13 +55,30 @@ describe('HttpClient', () => {
       method: 'POST',
       path: '/v1/test',
       body: { key: 'value' },
-      auth: 'jwt',
+      auth: 'apiKey',
     });
 
     const headers = capturedInit!.headers as Record<string, string>;
-    expect(headers['Authorization']).toBe('Bearer jwt_token');
     expect(headers['Content-Type']).toBe('application/json');
+    expect(headers['X-API-Key']).toBe('bv_test_key');
     expect(capturedInit!.body).toBe('{"key":"value"}');
+  });
+
+  it('sends request without auth when auth is none', async () => {
+    let capturedInit: RequestInit | undefined;
+    const client = new HttpClient({
+      apiKey: 'bv_test_key',
+      baseUrl: 'https://api.test.com',
+      fetch: async (_url, init) => {
+        capturedInit = init;
+        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+      },
+      maxRetries: 0,
+    });
+
+    await client.request({ method: 'GET', path: '/v1/test', auth: 'none' });
+    const headers = capturedInit!.headers as Record<string, string>;
+    expect(headers['X-API-Key']).toBeUndefined();
   });
 
   it('handles 204 no-content responses', async () => {
@@ -231,7 +248,7 @@ describe('HttpClient', () => {
     ).rejects.toThrow('Network failed');
   });
 
-  it('setToken updates auth header', async () => {
+  it('setApiKey updates auth header', async () => {
     let capturedHeaders: Record<string, string> = {};
     const client = new HttpClient({
       baseUrl: 'https://api.test.com',
@@ -242,9 +259,9 @@ describe('HttpClient', () => {
       maxRetries: 0,
     });
 
-    client.setToken('new_token');
-    await client.request({ method: 'GET', path: '/v1/test', auth: 'jwt' });
-    expect(capturedHeaders['Authorization']).toBe('Bearer new_token');
+    client.setApiKey('bv_new_key');
+    await client.request({ method: 'GET', path: '/v1/test', auth: 'apiKey' });
+    expect(capturedHeaders['X-API-Key']).toBe('bv_new_key');
   });
 
   it('preserves error details', async () => {
@@ -263,5 +280,51 @@ describe('HttpClient', () => {
       expect(err).toBeInstanceOf(BizVerifyError);
       expect((err as BizVerifyError).details).toEqual({ field: 'email' });
     }
+  });
+
+  it('captures response meta from credit and rate-limit headers', async () => {
+    const client = new HttpClient({
+      baseUrl: 'https://api.test.com',
+      fetch: async () => {
+        const headers = new Headers({
+          'content-type': 'application/json',
+          'x-credits-remaining': '85',
+          'x-credits-charged': '15',
+          'x-ratelimit-limit': '60',
+          'x-ratelimit-remaining': '59',
+          'x-ratelimit-reset': '1710000060',
+        });
+        return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+      },
+      maxRetries: 0,
+    });
+
+    expect(client.lastResponseMeta).toBeNull();
+
+    await client.request({ method: 'GET', path: '/v1/test', auth: 'apiKey' });
+
+    const meta = client.lastResponseMeta;
+    expect(meta).not.toBeNull();
+    expect(meta!.creditsRemaining).toBe(85);
+    expect(meta!.creditsCharged).toBe(15);
+    expect(meta!.rateLimitLimit).toBe(60);
+    expect(meta!.rateLimitRemaining).toBe(59);
+    expect(meta!.rateLimitReset).toBe(1710000060);
+  });
+
+  it('returns null for missing response meta headers', async () => {
+    const client = new HttpClient({
+      baseUrl: 'https://api.test.com',
+      fetch: async () => new Response(JSON.stringify({ ok: true }), { status: 200 }),
+      maxRetries: 0,
+    });
+
+    await client.request({ method: 'GET', path: '/v1/test', auth: 'none' });
+
+    const meta = client.lastResponseMeta;
+    expect(meta).not.toBeNull();
+    expect(meta!.creditsRemaining).toBeNull();
+    expect(meta!.creditsCharged).toBeNull();
+    expect(meta!.rateLimitLimit).toBeNull();
   });
 });

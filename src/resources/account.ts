@@ -4,8 +4,6 @@ import type {
   UsageStats,
   DataExport,
   UpdateEmailParams,
-  UpdatePasswordParams,
-  DeleteAccountParams,
   CreateKeyParams,
   CreateKeyResponse,
 } from '../types.js';
@@ -17,7 +15,7 @@ export class AccountResource {
     return this.client.request<Account>({
       method: 'GET',
       path: '/v1/account',
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 
@@ -26,7 +24,7 @@ export class AccountResource {
       method: 'GET',
       path: '/v1/account/usage',
       query: { days: params?.days },
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 
@@ -34,7 +32,7 @@ export class AccountResource {
     return this.client.request<DataExport>({
       method: 'GET',
       path: '/v1/account/data-export',
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 
@@ -43,25 +41,7 @@ export class AccountResource {
       method: 'PATCH',
       path: '/v1/account',
       body: params,
-      auth: 'jwt',
-    });
-  }
-
-  async updatePassword(params: UpdatePasswordParams): Promise<void> {
-    await this.client.request<undefined>({
-      method: 'PUT',
-      path: '/v1/account/password',
-      body: params,
-      auth: 'jwt',
-    });
-  }
-
-  async delete(params: DeleteAccountParams): Promise<void> {
-    await this.client.request<undefined>({
-      method: 'DELETE',
-      path: '/v1/account',
-      body: params,
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 
@@ -70,7 +50,7 @@ export class AccountResource {
       method: 'POST',
       path: '/v1/account/keys',
       body: params,
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 
@@ -78,7 +58,7 @@ export class AccountResource {
     await this.client.request<undefined>({
       method: 'DELETE',
       path: `/v1/account/keys/${keyId}`,
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 }

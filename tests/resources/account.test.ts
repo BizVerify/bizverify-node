@@ -10,7 +10,7 @@ import {
 import { AuthenticationError } from '../../src/errors.js';
 
 describe('AccountResource', () => {
-  it('gets account info', async () => {
+  it('gets account info with API key auth', async () => {
     const { client, calls } = createMockClient([{ status: 200, body: accountResponse }]);
 
     const result = await client.account.get();
@@ -18,12 +18,12 @@ describe('AccountResource', () => {
     expect(result.email).toBe('test@example.com');
     expect(result.credit_balance).toBe(100);
     const headers = calls[0]!.init.headers as Record<string, string>;
-    expect(headers['Authorization']).toBe('Bearer test-jwt-token');
+    expect(headers['X-API-Key']).toBe('bv_test_key');
   });
 
-  it('throws AuthenticationError without token', async () => {
+  it('throws AuthenticationError without API key', async () => {
     const { client } = createMockClient([
-      { status: 401, body: errorResponse('UNAUTHORIZED', 'No token') },
+      { status: 401, body: errorResponse('UNAUTHORIZED', 'No API key') },
     ]);
 
     await expect(client.account.get()).rejects.toThrow(AuthenticationError);
@@ -56,27 +56,6 @@ describe('AccountResource', () => {
 
     expect(result.email).toBe('new@example.com');
     expect(calls[0]!.init.method).toBe('PATCH');
-  });
-
-  it('updates password', async () => {
-    const { client, calls } = createMockClient([{ status: 204, body: null }]);
-
-    await client.account.updatePassword({
-      current_password: 'old',
-      new_password: 'new12345',
-    });
-
-    expect(calls[0]!.init.method).toBe('PUT');
-    expect(calls[0]!.url).toContain('/v1/account/password');
-  });
-
-  it('deletes account', async () => {
-    const { client, calls } = createMockClient([{ status: 204, body: null }]);
-
-    await client.account.delete({ password: 'mypassword' });
-
-    expect(calls[0]!.init.method).toBe('DELETE');
-    expect(calls[0]!.url).toContain('/v1/account');
   });
 
   it('creates API key', async () => {

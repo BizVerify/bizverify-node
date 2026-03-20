@@ -12,7 +12,7 @@ export class BillingResource {
         limit: params?.limit,
         offset: params?.offset,
       },
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 
@@ -21,7 +21,7 @@ export class BillingResource {
       method: 'POST',
       path: '/v1/billing/purchase',
       body: params,
-      auth: 'jwt',
+      auth: 'apiKey',
     });
   }
 }

@@ -38,7 +38,6 @@ export function createMockClient(responses: MockResponse[]) {
 
   const client = new BizVerify({
     apiKey: 'bv_test_key',
-    token: 'test-jwt-token',
     baseUrl: 'https://api.test.com',
     fetch: mockFetch as typeof globalThis.fetch,
     maxRetries: 0,

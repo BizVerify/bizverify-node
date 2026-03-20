@@ -2,7 +2,6 @@
 
 export interface BizVerifyOptions {
   apiKey?: string;
-  token?: string;
   baseUrl?: string;
   maxRetries?: number;
   timeout?: number;
@@ -63,57 +62,69 @@ export interface FilingSummary {
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
-export interface User {
-  id: string;
+export interface RequestAccessParams {
   email: string;
-  email_verified: boolean;
-  plan: 'free' | 'paid';
-  credit_balance: number;
-  created_at: string;
-}
-
-export interface RegisterParams {
-  email: string;
-  password: string;
   accept_terms: boolean;
 }
 
-export interface RegisterResponse {
-  user: User;
+export interface RequestAccessResponse {
+  message: string;
+}
+
+export interface VerifyAccessParams {
+  email: string;
+  code: string;
+  label?: string;
+}
+
+export interface VerifyAccessResponse {
   api_key: string;
-}
-
-export interface LoginParams {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: User;
-}
-
-export interface VerifyEmailParams {
-  email: string;
-  code: string;
-}
-
-export interface ResendVerificationParams {
-  email: string;
-}
-
-export interface ForgotPasswordParams {
-  email: string;
-}
-
-export interface ResetPasswordParams {
-  email: string;
-  code: string;
-  new_password: string;
+  key_id: string;
+  label: string;
 }
 
 export interface MessageResponse {
   message: string;
+}
+
+// ── Response Metadata ───────────────────────────────────────────────────────
+
+export interface ResponseMeta {
+  creditsRemaining: number | null;
+  creditsCharged: number | null;
+  rateLimitLimit: number | null;
+  rateLimitRemaining: number | null;
+  rateLimitReset: number | null;
+}
+
+// ── Config ──────────────────────────────────────────────────────────────────
+
+export interface ConfigResponse {
+  jurisdictions: {
+    stats: { totalJurisdictions: number; usStates: number; countries: number };
+    supported: { us: string[]; international: string[]; comingSoon: string[] };
+  };
+  checker: { jurisdictions: Array<{ label: string; code: string }> };
+  pricing: {
+    creditCosts: Record<string, number>;
+    freeTier: { credits: number; replenish: string; rateLimit: string };
+    packages: unknown[];
+  };
+  features: Record<string, boolean>;
+  rateLimits: { default: number };
+  status: { api: string; lastUpdated: string };
+  legal: { terms_url: string; privacy_url: string; version: string };
+  docs: { openapi: string; interactive: string };
+}
+
+export interface JurisdictionInfo {
+  code: string;
+  name: string;
+  features: Record<string, boolean>;
+}
+
+export interface JurisdictionsResponse {
+  jurisdictions: JurisdictionInfo[];
 }
 
 // ── Verification ─────────────────────────────────────────────────────────────
@@ -306,15 +317,6 @@ export interface DataExport {
 
 export interface UpdateEmailParams {
   email: string;
-}
-
-export interface UpdatePasswordParams {
-  current_password: string;
-  new_password: string;
-}
-
-export interface DeleteAccountParams {
-  password: string;
 }
 
 export interface CreateKeyParams {

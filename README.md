@@ -33,19 +33,37 @@ const full = await biz.verification.verifyAndWait({
 
 ## Authentication
 
+BizVerify uses API key authentication. Get your key via the passwordless auth flow:
+
 ```typescript
-// API key only (verification, search, entities)
-const biz = new BizVerify({ apiKey: 'bv_live_...' });
+const biz = new BizVerify();
 
-// JWT only (account, billing)
-const biz = new BizVerify({ token: 'eyJ...' });
+// Step 1: Request access (sends OTP to email)
+await biz.auth.requestAccess({ email: 'you@company.com', accept_terms: true });
 
-// Both
-const biz = new BizVerify({ apiKey: 'bv_live_...', token: 'eyJ...' });
+// Step 2: Verify with the code from your email
+const { api_key } = await biz.auth.verifyAccess({
+  email: 'you@company.com',
+  code: '123456',
+  label: 'my-app',
+});
 
-// Login flow — JWT auto-stored on client
-const { token, user } = await biz.auth.login({ email, password });
-// biz.account.get() now works without manually setting token
+// Client is now auto-configured with the new API key.
+// For future sessions, pass the key directly:
+const biz2 = new BizVerify({ apiKey: api_key });
+```
+
+## Credit & Rate-Limit Tracking
+
+Every API response captures credit and rate-limit headers:
+
+```typescript
+await biz.verification.verify({ entity_name: 'Acme', jurisdiction: 'us-fl' });
+
+const meta = biz.lastResponseMeta;
+console.log(meta?.creditsRemaining);    // 85
+console.log(meta?.creditsCharged);      // 15
+console.log(meta?.rateLimitRemaining);  // 59
 ```
 
 ## Resources
@@ -53,12 +71,8 @@ const { token, user } = await biz.auth.login({ email, password });
 ### Auth
 
 ```typescript
-await biz.auth.register({ email, password, accept_terms: true });
-await biz.auth.login({ email, password });
-await biz.auth.verifyEmail({ email, code });
-await biz.auth.resendVerification({ email });
-await biz.auth.forgotPassword({ email });
-await biz.auth.resetPassword({ email, code, new_password });
+await biz.auth.requestAccess({ email, accept_terms: true });
+const { api_key } = await biz.auth.verifyAccess({ email, code, label: 'my-agent' });
 ```
 
 ### Verification
@@ -108,8 +122,6 @@ const account = await biz.account.get();
 const usage = await biz.account.usage({ days: 7 });
 const data = await biz.account.dataExport();
 await biz.account.updateEmail({ email: 'new@example.com' });
-await biz.account.updatePassword({ current_password, new_password });
-await biz.account.delete({ password });
 const key = await biz.account.createKey({ label: 'Production' });
 await biz.account.revokeKey(keyId);
 ```
@@ -121,7 +133,18 @@ const billing = await biz.billing.get();
 const { url } = await biz.billing.purchase({ package_id: 'starter' });
 ```
 
-### Checker (Free, no auth)
+### Config (no auth required)
+
+```typescript
+const biz = new BizVerify();
+const config = await biz.config.get();
+console.log(config.jurisdictions.supported.us); // ['us-fl', 'us-de', ...]
+console.log(config.pricing.creditCosts);        // { verify: 15, search: 2 }
+
+const { jurisdictions } = await biz.config.jurisdictions();
+```
+
+### Checker (free, no auth)
 
 ```typescript
 const biz = new BizVerify();
@@ -149,7 +172,7 @@ try {
 | Exception | Status | When |
 |-----------|--------|------|
 | `ValidationError` | 400, 422 | Invalid request parameters |
-| `AuthenticationError` | 401 | Bad/missing API key or JWT |
+| `AuthenticationError` | 401 | Bad/missing API key |
 | `InsufficientCreditsError` | 402 | Not enough credits |
 | `AuthorizationError` | 403 | Forbidden (email not verified, account disabled) |
 | `NotFoundError` | 404 | Entity/job not found |
@@ -164,7 +187,6 @@ try {
 ```typescript
 const biz = new BizVerify({
   apiKey: 'bv_live_...',
-  token: 'eyJ...',
   baseUrl: 'https://api.bizverify.co', // default
   maxRetries: 2,                        // retries on 5xx (default: 2)
   timeout: 30_000,                      // per-request timeout ms (default: 30s)

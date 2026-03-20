@@ -11,6 +11,8 @@ describe('BillingResource', () => {
 
     expect(result.balance).toBe(100);
     expect(calls[0]!.url).toContain('/v1/billing');
+    const headers = calls[0]!.init.headers as Record<string, string>;
+    expect(headers['X-API-Key']).toBe('bv_test_key');
   });
 
   it('gets billing with pagination', async () => {
@@ -32,9 +34,9 @@ describe('BillingResource', () => {
     expect(calls[0]!.init.method).toBe('POST');
   });
 
-  it('throws AuthenticationError without JWT', async () => {
+  it('throws AuthenticationError without API key', async () => {
     const { client } = createMockClient([
-      { status: 401, body: errorResponse('UNAUTHORIZED', 'No token') },
+      { status: 401, body: errorResponse('UNAUTHORIZED', 'No API key') },
     ]);
 
     await expect(client.billing.get()).rejects.toThrow(AuthenticationError);

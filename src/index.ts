@@ -1,4 +1,4 @@
-import type { BizVerifyOptions } from './types.js';
+import type { BizVerifyOptions, ResponseMeta } from './types.js';
 import { HttpClient } from './client.js';
 import { AuthResource } from './resources/auth.js';
 import { VerificationResource } from './resources/verification.js';
@@ -7,6 +7,7 @@ import { SearchResource } from './resources/search.js';
 import { AccountResource } from './resources/account.js';
 import { BillingResource } from './resources/billing.js';
 import { CheckerResource } from './resources/checker.js';
+import { ConfigResource } from './resources/config.js';
 
 export class BizVerify {
   readonly auth: AuthResource;
@@ -16,17 +17,24 @@ export class BizVerify {
   readonly account: AccountResource;
   readonly billing: BillingResource;
   readonly checker: CheckerResource;
+  readonly config: ConfigResource;
+  private readonly client: HttpClient;
 
   constructor(options: BizVerifyOptions = {}) {
-    const client = new HttpClient(options);
+    this.client = new HttpClient(options);
 
-    this.auth = new AuthResource(client);
-    this.verification = new VerificationResource(client);
-    this.entities = new EntitiesResource(client);
-    this.search = new SearchResource(client);
-    this.account = new AccountResource(client);
-    this.billing = new BillingResource(client);
-    this.checker = new CheckerResource(client);
+    this.auth = new AuthResource(this.client);
+    this.verification = new VerificationResource(this.client);
+    this.entities = new EntitiesResource(this.client);
+    this.search = new SearchResource(this.client);
+    this.account = new AccountResource(this.client);
+    this.billing = new BillingResource(this.client);
+    this.checker = new CheckerResource(this.client);
+    this.config = new ConfigResource(this.client);
+  }
+
+  get lastResponseMeta(): ResponseMeta | null {
+    return this.client.lastResponseMeta;
   }
 }
 
@@ -49,6 +57,7 @@ export {
 
 export type {
   BizVerifyOptions,
+  ResponseMeta,
   VerificationLevel,
   EntityType,
   EntityStatus,
@@ -57,15 +66,10 @@ export type {
   RegisteredAgent,
   Officer,
   FilingSummary,
-  User,
-  RegisterParams,
-  RegisterResponse,
-  LoginParams,
-  LoginResponse,
-  VerifyEmailParams,
-  ResendVerificationParams,
-  ForgotPasswordParams,
-  ResetPasswordParams,
+  RequestAccessParams,
+  RequestAccessResponse,
+  VerifyAccessParams,
+  VerifyAccessResponse,
   MessageResponse,
   VerifyParams,
   VerifyResponse,
@@ -85,8 +89,6 @@ export type {
   JurisdictionSummary,
   DataExport,
   UpdateEmailParams,
-  UpdatePasswordParams,
-  DeleteAccountParams,
   CreateKeyParams,
   CreateKeyResponse,
   BillingParams,
@@ -96,4 +98,7 @@ export type {
   CheckerParams,
   CheckerResult,
   CheckerResponse,
+  ConfigResponse,
+  JurisdictionInfo,
+  JurisdictionsResponse,
 } from './types.js';

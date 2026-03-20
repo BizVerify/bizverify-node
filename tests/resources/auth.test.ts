@@ -1,53 +1,74 @@
 import { describe, it, expect } from 'vitest';
 import { createMockClient } from '../helpers.js';
-import { registerResponse, loginResponse, messageResponse, errorResponse } from '../fixtures/responses.js';
-import { ConflictError, ValidationError } from '../../src/errors.js';
+import { requestAccessResponse, verifyAccessResponse, errorResponse } from '../fixtures/responses.js';
+import { ValidationError } from '../../src/errors.js';
 
 describe('AuthResource', () => {
-  it('registers a new user', async () => {
-    const { client, calls } = createMockClient([{ status: 201, body: registerResponse }]);
+  it('requests access with email', async () => {
+    const { client, calls } = createMockClient([{ status: 200, body: requestAccessResponse }]);
 
-    const result = await client.auth.register({
+    const result = await client.auth.requestAccess({
       email: 'test@example.com',
-      password: 'password123',
       accept_terms: true,
     });
 
-    expect(result.user.email).toBe('test@example.com');
-    expect(result.api_key).toBe('bv_live_abc123def456');
-    expect(calls[0]!.url).toContain('/v1/auth/register');
+    expect(result.message).toContain('test@example.com');
+    expect(calls[0]!.url).toContain('/v1/auth/request-access');
+    // No auth header on public endpoint
+    const headers = calls[0]!.init.headers as Record<string, string>;
+    expect(headers['X-API-Key']).toBeUndefined();
+    expect(headers['Authorization']).toBeUndefined();
   });
 
-  it('throws ConflictError on duplicate email', async () => {
+  it('throws ValidationError on invalid request', async () => {
     const { client } = createMockClient([
-      { status: 409, body: errorResponse('EMAIL_ALREADY_EXISTS', 'Email taken') },
+      { status: 400, body: errorResponse('VALIDATION_ERROR', 'accept_terms is required') },
     ]);
 
     await expect(
-      client.auth.register({ email: 'dup@example.com', password: 'password123', accept_terms: true }),
-    ).rejects.toThrow(ConflictError);
+      client.auth.requestAccess({ email: 'test@example.com', accept_terms: false }),
+    ).rejects.toThrow(ValidationError);
   });
 
-  it('logs in and auto-stores JWT', async () => {
+  it('verifies access and returns API key', async () => {
+    const { client, calls } = createMockClient([{ status: 200, body: verifyAccessResponse }]);
+
+    const result = await client.auth.verifyAccess({
+      email: 'test@example.com',
+      code: '123456',
+    });
+
+    expect(result.api_key).toBe('bv_live_abc123def456');
+    expect(result.key_id).toBe('key_001');
+    expect(result.label).toBeDefined();
+    expect(calls[0]!.url).toContain('/v1/auth/verify-access');
+  });
+
+  it('verifies access with custom label', async () => {
+    const { client, calls } = createMockClient([{ status: 200, body: verifyAccessResponse }]);
+
+    await client.auth.verifyAccess({
+      email: 'test@example.com',
+      code: '123456',
+      label: 'my-agent',
+    });
+
+    const body = JSON.parse(calls[0]!.init.body as string) as Record<string, unknown>;
+    expect(body.label).toBe('my-agent');
+  });
+
+  it('auto-configures client with API key after verifyAccess', async () => {
     const { client, calls } = createMockClient([
-      { status: 200, body: loginResponse },
+      { status: 200, body: verifyAccessResponse },
       { status: 200, body: { id: '1', email: 'test@example.com' } },
     ]);
 
-    const result = await client.auth.login({ email: 'test@example.com', password: 'password123' });
-    expect(result.token).toBeDefined();
+    await client.auth.verifyAccess({ email: 'test@example.com', code: '123456' });
 
-    // Subsequent JWT-authed request should use the stored token
+    // Subsequent API-key-authed request should use the new key
     await client.account.get();
     const headers = calls[1]!.init.headers as Record<string, string>;
-    expect(headers['Authorization']).toBe(`Bearer ${loginResponse.token}`);
-  });
-
-  it('verifies email', async () => {
-    const { client } = createMockClient([{ status: 200, body: messageResponse }]);
-
-    const result = await client.auth.verifyEmail({ email: 'test@example.com', code: '123456' });
-    expect(result.message).toBe('Success');
+    expect(headers['X-API-Key']).toBe('bv_live_abc123def456');
   });
 
   it('throws ValidationError on invalid code', async () => {
@@ -56,29 +77,7 @@ describe('AuthResource', () => {
     ]);
 
     await expect(
-      client.auth.verifyEmail({ email: 'test@example.com', code: '000000' }),
+      client.auth.verifyAccess({ email: 'test@example.com', code: '000000' }),
     ).rejects.toThrow(ValidationError);
-  });
-
-  it('resends verification', async () => {
-    const { client } = createMockClient([{ status: 200, body: messageResponse }]);
-    const result = await client.auth.resendVerification({ email: 'test@example.com' });
-    expect(result.message).toBeDefined();
-  });
-
-  it('requests password reset', async () => {
-    const { client } = createMockClient([{ status: 200, body: messageResponse }]);
-    const result = await client.auth.forgotPassword({ email: 'test@example.com' });
-    expect(result.message).toBeDefined();
-  });
-
-  it('resets password', async () => {
-    const { client } = createMockClient([{ status: 200, body: messageResponse }]);
-    const result = await client.auth.resetPassword({
-      email: 'test@example.com',
-      code: '123456',
-      new_password: 'newpass123',
-    });
-    expect(result.message).toBeDefined();
   });
 });
