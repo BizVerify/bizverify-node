@@ -1,7 +1,7 @@
 {
   "name": "@bizverify/sdk",
-  "version": "1.0.0",
-  "description": "Official TypeScript/Node.js SDK for the BizVerify API",
+  "version": "0.1.0",
+  "description": "Official Node.js/TypeScript SDK for the BizVerify API — verify business entities against official government registries (Secretary of State, Companies House). Built for the US and Europe.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,7 +19,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
@@ -33,10 +35,24 @@
     "bizverify",
     "business-verification",
     "entity-verification",
+    "kyb",
+    "know-your-business",
+    "secretary-of-state",
+    "companies-house",
     "api-client",
+    "due-diligence",
+    "compliance",
     "sdk"
   ],
-  "author": "BizVerify",
+  "homepage": "https://bizverify.co",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BizVerify/bizverify-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BizVerify/bizverify-node/issues"
+  },
+  "author": "BizVerify <hello@bizverify.co> (https://bizverify.co)",
   "license": "MIT",
   "engines": {
     "node": ">=18"

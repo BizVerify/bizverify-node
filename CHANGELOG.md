@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (Unreleased)
+## 0.1.0 (2026-03-23)
 
 - Initial release
 - Full coverage of BizVerify public API (auth, verification, search, entities, account, billing, checker)
