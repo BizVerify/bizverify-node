@@ -3,12 +3,12 @@ import { BizVerify, JobFailedError, TimeoutError } from '@bizverify/sdk';
 const biz = new BizVerify({ apiKey: 'bv_live_...' });
 
 try {
-  // Full verification — starts async job and polls until complete
+  // Deep verification — starts async job and polls until complete
   const result = await biz.verification.verifyAndWait(
     {
       entity_name: 'Acme Corporation',
       jurisdiction: 'us-fl',
-      verification_level: 'full',
+      verification_level: 'deep',
     },
     {
       timeoutMs: 120_000,

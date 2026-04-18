@@ -10,7 +10,7 @@ export interface BizVerifyOptions {
 
 // ── Domain Types ─────────────────────────────────────────────────────────────
 
-export type VerificationLevel = 'pre_check' | 'full';
+export type VerificationLevel = 'quick' | 'deep';
 
 export type EntityType =
   | 'llc'

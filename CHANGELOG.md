@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 (2026-04-18)
+
+- BREAKING: rename VerificationLevel values pre_check→quick, full→deep. Reframes tiers as Quick check and Deep verification.
+
 ## 0.1.0 (2026-03-23)
 
 - Initial release

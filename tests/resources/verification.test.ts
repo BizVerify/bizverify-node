@@ -24,7 +24,7 @@ describe('VerificationResource', () => {
     const result = await client.verification.verify({
       entity_name: 'Acme Inc',
       jurisdiction: 'us-fl',
-      verification_level: 'full',
+      verification_level: 'deep',
     });
 
     expect(result.status).toBe('pending');
@@ -68,7 +68,7 @@ describe('VerificationResource', () => {
     ]);
 
     const result = await client.verification.verifyAndWait(
-      { entity_name: 'Acme Inc', jurisdiction: 'us-fl', verification_level: 'full' },
+      { entity_name: 'Acme Inc', jurisdiction: 'us-fl', verification_level: 'deep' },
       { pollIntervalMs: 10 },
     );
 
@@ -82,7 +82,7 @@ describe('VerificationResource', () => {
       entity_name: 'Acme Inc',
       jurisdiction: 'us-fl',
       entity_type: 'corporation',
-      verification_level: 'full',
+      verification_level: 'deep',
       force_refresh: true,
       webhook_url: 'https://example.com/hook',
     });

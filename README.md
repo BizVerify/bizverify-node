@@ -17,17 +17,17 @@ import { BizVerify } from '@bizverify/sdk';
 
 const biz = new BizVerify({ apiKey: 'bv_live_...' });
 
-// Quick pre-check
+// Quick check
 const result = await biz.verification.verify({
   entity_name: 'Acme Corporation',
   jurisdiction: 'us-fl',
 });
 
-// Full verification with polling
+// Deep verification with polling
 const full = await biz.verification.verifyAndWait({
   entity_name: 'Acme Corporation',
   jurisdiction: 'us-fl',
-  verification_level: 'full',
+  verification_level: 'deep',
 });
 ```
 
@@ -82,13 +82,13 @@ const { api_key } = await biz.auth.verifyAccess({ email, code, label: 'my-agent'
 const job = await biz.verification.verify({
   entity_name: 'Acme Inc',
   jurisdiction: 'us-fl',
-  verification_level: 'full',
+  verification_level: 'deep',
   webhook_url: 'https://example.com/hook', // optional
 });
 
 // Poll until complete
 const result = await biz.verification.verifyAndWait(
-  { entity_name: 'Acme Inc', jurisdiction: 'us-fl', verification_level: 'full' },
+  { entity_name: 'Acme Inc', jurisdiction: 'us-fl', verification_level: 'deep' },
   { timeoutMs: 120_000, onStatusChange: (s) => console.log(s.status) },
 );
 
