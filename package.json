@@ -1,7 +1,7 @@
 {
   "name": "@bizverify/sdk",
   "version": "0.2.0",
-  "description": "Official Node.js/TypeScript SDK for the BizVerify API — verify business entities against official government registries (Secretary of State, Companies House). Built for the US and Europe.",
+  "description": "Official Node.js/TypeScript SDK for the BizVerify API — verify business entities against official government registries (Secretary of State, Companies House) across the US and Europe.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
