@@ -18,6 +18,8 @@ export const verifyResponseSync = {
   entity_id: 'ent_123',
   cached: true,
   credits_charged: 1,
+  verification_level: 'deep' as const,
+  full_verification_available: true,
 };
 
 export const verifyResponseAsync = {
@@ -25,6 +27,8 @@ export const verifyResponseAsync = {
   job_id: 'job_456',
   cached: false,
   credits_charged: 15,
+  verification_level: 'deep' as const,
+  full_verification_available: true,
 };
 
 export const jobStatusPending = {
@@ -77,6 +81,42 @@ export const entityResponse = {
   filing_history_summary: [],
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:00:00.000Z',
+};
+
+export const entityResponseFull = {
+  id: '550e8400-e29b-41d4-a716-446655440000',
+  jurisdiction: 'us-fl',
+  jurisdiction_id: 'L21000098765',
+  entity_name: 'ACME WIDGETS LLC',
+  entity_type: 'llc' as const,
+  status: 'active' as const,
+  good_standing: true,
+  formation_date: '2021-03-15',
+  registered_agent: {
+    name: 'JANE AGENT',
+    address: {
+      line1: '100 AGENT WAY',
+      line2: null,
+      city: 'TALLAHASSEE',
+      state: 'FL',
+      postal_code: '32301',
+      country: 'US',
+    },
+  },
+  officers: [{ name: 'JOHN DOE', title: 'Manager', address: null }],
+  principal_address: {
+    line1: '200 COMMERCE BLVD',
+    line2: 'SUITE 400',
+    city: 'MIAMI',
+    state: 'FL',
+    postal_code: '33131',
+    country: 'US',
+  },
+  filing_history_summary: [{ date: '2024-01-10', type: 'ANNUAL REPORT', description: null }],
+  last_verified_at: '2026-06-13T10:30:00.000Z',
+  snapshots: 3,
+  created_at: '2024-01-05T08:00:00.000Z',
+  updated_at: '2026-06-13T10:30:00.000Z',
 };
 
 export const historyResponse = {

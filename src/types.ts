@@ -138,6 +138,11 @@ export interface VerifyParams {
   webhook_url?: string;
 }
 
+export interface VerificationReason {
+  code: 'jurisdiction_quick_only';
+  message: string;
+}
+
 export interface VerifyResponse {
   status: string;
   data?: unknown;
@@ -145,6 +150,12 @@ export interface VerifyResponse {
   entity_id?: string;
   cached: boolean;
   credits_charged: number;
+  /** The verification tier that was actually performed for this request. */
+  verification_level: VerificationLevel;
+  /** Whether a deep verification is available for the requested jurisdiction. */
+  full_verification_available: boolean;
+  /** Present when `full_verification_available` is false, explaining why. */
+  reason?: VerificationReason;
 }
 
 export interface JobStatusResponse {
@@ -181,6 +192,10 @@ export interface Entity {
   officers: Officer[];
   principal_address: Address | null;
   filing_history_summary: FilingSummary[];
+  /** ISO timestamp of the most recent verification of this entity's official record. */
+  last_verified_at?: string | null;
+  /** Number of recorded snapshots of this entity's official record over time. */
+  snapshots?: number;
   created_at: string;
   updated_at: string;
 }
