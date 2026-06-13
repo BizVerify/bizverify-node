@@ -73,6 +73,7 @@ export type {
   MessageResponse,
   VerifyParams,
   VerifyResponse,
+  VerificationReason,
   JobStatusResponse,
   VerifyAndWaitOptions,
   Entity,

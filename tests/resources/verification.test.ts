@@ -15,6 +15,8 @@ describe('VerificationResource', () => {
     expect(result.status).toBe('completed');
     expect(result.cached).toBe(true);
     expect(result.credits_charged).toBe(1);
+    expect(result.verification_level).toBe('deep');
+    expect(result.full_verification_available).toBe(true);
     expect(calls[0]!.url).toContain('/v1/verify');
   });
 
